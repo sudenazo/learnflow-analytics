@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LearnFlow – Analytics Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #0d0f14; --s1: #161922; --s2: #1e2230;
+  --acc: #4f8cff; --acc2: #a78bfa; --grn: #34d399;
+  --red: #f87171; --amb: #fbbf24;
+  --txt: #f0f2f8; --muted: #8891a8; --bdr: rgba(255,255,255,0.07);
+}
+body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--txt); font-size: 14px; }
+
+header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 1.2rem 2rem; border-bottom: 1px solid var(--bdr);
+  background: var(--s1); position: sticky; top: 0; z-index: 10;
+}
+.logo { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.1rem; }
+.logo span { color: var(--acc); }
+.header-meta { font-size: 0.8rem; color: var(--muted); }
+.pill {
+  display: inline-block; background: rgba(52,211,153,0.12); color: var(--grn);
+  border: 1px solid rgba(52,211,153,0.25); border-radius: 999px;
+  padding: 0.2rem 0.8rem; font-size: 0.72rem; font-weight: 500; margin-left: 1rem;
+}
+
+.main { display: grid; grid-template-columns: 220px 1fr; min-height: 100vh; }
+
+/* ── SIDEBAR ── */
+aside {
+  background: var(--s1); border-right: 1px solid var(--bdr);
+  padding: 1.5rem 1rem;
+}
+.nav-section { font-size: 0.7rem; color: var(--muted); text-transform: uppercase;
+  letter-spacing: 0.08em; margin: 1.2rem 0 0.5rem; padding-left: 0.5rem; }
+.nav-item {
+  display: flex; align-items: center; gap: 0.7rem;
+  padding: 0.55rem 0.75rem; border-radius: 8px; cursor: pointer;
+  color: var(--muted); font-size: 0.88rem; transition: all 0.15s;
+}
+.nav-item:hover, .nav-item.active { background: rgba(79,140,255,0.12); color: var(--txt); }
+.nav-item.active { color: var(--acc); }
+.dot { width: 7px; height: 7px; border-radius: 50%; background: var(--grn);
+  display: inline-block; margin-left: auto; animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+/* ── CONTENT ── */
+.content { padding: 2rem; overflow-y: auto; }
+
+.date-bar {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 1.8rem;
+}
+.date-bar h1 { font-family: 'Syne', sans-serif; font-size: 1.4rem; }
+.range-btns { display: flex; gap: 0.4rem; }
+.rb {
+  background: var(--s2); border: 1px solid var(--bdr);
+  color: var(--muted); border-radius: 6px; padding: 0.4rem 0.85rem;
+  font-size: 0.78rem; cursor: pointer; font-family: 'Inter', sans-serif;
+  transition: all 0.15s;
+}
+.rb.active, .rb:hover { background: rgba(79,140,255,0.15); color: var(--acc); border-color: rgba(79,140,255,0.4); }
+
+/* ── METRIC CARDS ── */
+.metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1.8rem; }
+.metric {
+  background: var(--s1); border: 1px solid var(--bdr); border-radius: 12px; padding: 1.2rem 1.4rem;
+}
+.metric-label { font-size: 0.75rem; color: var(--muted); margin-bottom: 0.5rem; }
+.metric-value { font-family: 'Syne', sans-serif; font-size: 1.9rem; font-weight: 700; margin-bottom: 0.3rem; }
+.metric-delta { font-size: 0.78rem; }
+.up { color: var(--grn); } .down { color: var(--red); } .neutral { color: var(--muted); }
+
+/* ── CHART AREA ── */
+.charts-row { display: grid; grid-template-columns: 2fr 1fr; gap: 1rem; margin-bottom: 1.8rem; }
+.card {
+  background: var(--s1); border: 1px solid var(--bdr); border-radius: 12px; padding: 1.4rem;
+}
+.card-title { font-size: 0.8rem; color: var(--muted); margin-bottom: 1.2rem; text-transform: uppercase; letter-spacing: 0.06em; }
+.chart-wrap { position: relative; width: 100%; }
+
+/* SVG line chart */
+.chart-svg { width: 100%; overflow: visible; }
+
+/* Funnel */
+.funnel { display: flex; flex-direction: column; gap: 0.6rem; }
+.funnel-step { position: relative; }
+.funnel-label { font-size: 0.78rem; color: var(--muted); margin-bottom: 0.3rem; display: flex; justify-content: space-between; }
+.funnel-bar { height: 28px; border-radius: 6px; position: relative; overflow: hidden; background: var(--s2); }
+.funnel-fill { height: 100%; border-radius: 6px; display: flex; align-items: center; padding-left: 10px;
+  font-size: 0.75rem; font-weight: 500; transition: width 1s cubic-bezier(0.16,1,0.3,1); }
+
+/* Bottom row */
+.bottom-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; }
+
+/* Event table */
+.event-table { width: 100%; border-collapse: collapse; }
+.event-table th { text-align: left; font-size: 0.72rem; color: var(--muted); padding: 0 0 0.7rem;
+  text-transform: uppercase; letter-spacing: 0.06em; border-bottom: 1px solid var(--bdr); }
+.event-table td { padding: 0.6rem 0; border-bottom: 1px solid var(--bdr); font-size: 0.82rem; }
+.event-table tr:last-child td { border-bottom: none; }
+.event-name { color: var(--acc); font-family: 'Inter', monospace; font-size: 0.78rem; }
+.count-badge {
+  background: var(--s2); border-radius: 4px; padding: 0.15rem 0.5rem;
+  font-size: 0.75rem; color: var(--muted);
+}
+
+/* Scroll depth donut */
+.donut-wrap { display: flex; flex-direction: column; gap: 0.7rem; margin-top: 0.5rem; }
+.scroll-bar { }
+.scroll-label { display: flex; justify-content: space-between; font-size: 0.78rem; margin-bottom: 0.25rem; }
+.scroll-track { height: 6px; background: var(--s2); border-radius: 3px; overflow: hidden; }
+.scroll-fill { height: 100%; border-radius: 3px; transition: width 1.2s cubic-bezier(0.16,1,0.3,1); }
+
+/* Device split */
+.device-list { display: flex; flex-direction: column; gap: 0.6rem; margin-top: 0.5rem; }
+.device-item { display: flex; align-items: center; gap: 0.7rem; }
+.device-icon { font-size: 1.1rem; width: 24px; text-align: center; }
+.device-info { flex: 1; }
+.device-name { font-size: 0.82rem; margin-bottom: 0.2rem; }
+.device-bar-wrap { height: 4px; background: var(--s2); border-radius: 2px; }
+.device-bar { height: 100%; border-radius: 2px; }
+.device-pct { font-size: 0.78rem; color: var(--muted); white-space: nowrap; }
+
+/* Insight box */
+.insights { margin-top: 1.8rem; }
+.insights h2 { font-family: 'Syne', sans-serif; font-size: 1rem; margin-bottom: 1rem; }
+.insight-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.8rem; }
+.insight-card {
+  background: var(--s1); border-radius: 10px; padding: 1rem 1.2rem;
+  border-left: 3px solid transparent;
+}
+.insight-card.warn { border-left-color: var(--amb); }
+.insight-card.good { border-left-color: var(--grn); }
+.insight-card.info { border-left-color: var(--acc); }
+.insight-icon { font-size: 1.1rem; margin-bottom: 0.5rem; }
+.insight-title { font-weight: 500; font-size: 0.85rem; margin-bottom: 0.3rem; }
+.insight-desc { font-size: 0.78rem; color: var(--muted); line-height: 1.55; }
+.insight-action { font-size: 0.72rem; color: var(--acc); margin-top: 0.5rem; font-weight: 500; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Learn<span>Flow</span> <span style="font-family:Inter;font-size:0.75rem;font-weight:400;color:var(--muted);margin-left:0.5rem">/ Analytics</span></div>
+  <div class="header-meta">
+    Data: Last 30 days · Source: Google Analytics 4
+    <span class="pill">● Live</span>
+  </div>
+</header>
+
+<div class="main">
+
+<!-- SIDEBAR -->
+<aside>
+  <div class="nav-section">Overview</div>
+  <div class="nav-item active">📊 Dashboard</div>
+  <div class="nav-item">👥 Audience</div>
+  <div class="nav-item">🔄 Conversions</div>
+
+  <div class="nav-section">Tracking</div>
+  <div class="nav-item">🏷 Events <span class="dot"></span></div>
+  <div class="nav-item">🔁 Funnels</div>
+  <div class="nav-item">🗺 User Flows</div>
+
+  <div class="nav-section">Campaigns</div>
+  <div class="nav-item">📣 UTM Sources</div>
+  <div class="nav-item">🔗 Channels</div>
+
+  <div class="nav-section">Settings</div>
+  <div class="nav-item">🛡 Consent (CMP)</div>
+  <div class="nav-item">🔧 Tag Manager</div>
+</aside>
+
+<!-- MAIN CONTENT -->
+<div class="content">
+
+  <!-- Date bar -->
+  <div class="date-bar">
+    <h1>User Behavior Overview</h1>
+    <div class="range-btns">
+      <button class="rb">7d</button>
+      <button class="rb active">30d</button>
+      <button class="rb">90d</button>
+      <button class="rb">Custom</button>
+    </div>
+  </div>
+
+  <!-- KPI Metrics -->
+  <div class="metrics">
+    <div class="metric">
+      <div class="metric-label">Total Users</div>
+      <div class="metric-value">4,821</div>
+      <div class="metric-delta up">▲ 18.4% vs prev. period</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Signup Conversion Rate</div>
+      <div class="metric-value" style="color:var(--acc)">3.2%</div>
+      <div class="metric-delta down">▼ 0.8% vs prev. period</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Bounce Rate</div>
+      <div class="metric-value" style="color:var(--amb)">61%</div>
+      <div class="metric-delta down">▼ 3.1% (improvement)</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Avg. Session Duration</div>
+      <div class="metric-value">2m 47s</div>
+      <div class="metric-delta up">▲ 12s vs prev. period</div>
+    </div>
+  </div>
+
+  <!-- Sessions chart + Funnel -->
+  <div class="charts-row">
+
+    <!-- Line chart: Sessions over time -->
+    <div class="card">
+      <div class="card-title">Daily Sessions — Last 30 Days</div>
+      <div class="chart-wrap" style="height:180px">
+        <svg class="chart-svg" viewBox="0 0 560 160" preserveAspectRatio="none" height="160">
+          <defs>
+            <linearGradient id="grad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#4f8cff" stop-opacity="0.25"/>
+              <stop offset="100%" stop-color="#4f8cff" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+          <!-- Grid lines -->
+          <line x1="0" y1="40" x2="560" y2="40" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
+          <line x1="0" y1="80" x2="560" y2="80" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
+          <line x1="0" y1="120" x2="560" y2="120" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
+          <!-- Area fill -->
+          <path d="M0,130 L19,120 L37,105 L56,110 L75,90 L93,95 L112,80 L130,85 L149,70 L168,60 L186,75 L205,55 L224,65 L242,50 L261,45 L280,55 L298,40 L317,48 L336,35 L354,42 L373,30 L391,38 L410,25 L429,32 L447,22 L466,28 L485,18 L503,24 L522,15 L541,20 L560,12 L560,155 L0,155 Z"
+            fill="url(#grad)"/>
+          <!-- Line -->
+          <path d="M0,130 L19,120 L37,105 L56,110 L75,90 L93,95 L112,80 L130,85 L149,70 L168,60 L186,75 L205,55 L224,65 L242,50 L261,45 L280,55 L298,40 L317,48 L336,35 L354,42 L373,30 L391,38 L410,25 L429,32 L447,22 L466,28 L485,18 L503,24 L522,15 L541,20 L560,12"
+            fill="none" stroke="#4f8cff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <!-- Y labels -->
+          <text x="0" y="36" fill="rgba(136,145,168,0.8)" font-size="10" font-family="Inter">200</text>
+          <text x="0" y="76" fill="rgba(136,145,168,0.8)" font-size="10" font-family="Inter">150</text>
+          <text x="0" y="116" fill="rgba(136,145,168,0.8)" font-size="10" font-family="Inter">100</text>
+          <!-- Annotation -->
+          <circle cx="373" cy="30" r="5" fill="#a78bfa"/>
+          <text x="340" y="20" fill="#a78bfa" font-size="10" font-family="Inter">Campaign launched</text>
+        </svg>
+        <!-- X axis labels -->
+        <div style="display:flex;justify-content:space-between;font-size:0.7rem;color:var(--muted);margin-top:0.3rem;">
+          <span>Apr 1</span><span>Apr 7</span><span>Apr 14</span><span>Apr 21</span><span>Apr 30</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Conversion Funnel -->
+    <div class="card">
+      <div class="card-title">Conversion Funnel</div>
+      <div class="funnel" id="funnel">
+        <div class="funnel-step">
+          <div class="funnel-label"><span>Page View</span><span>4,821</span></div>
+          <div class="funnel-bar"><div class="funnel-fill" style="width:100%;background:rgba(79,140,255,0.5)">100%</div></div>
+        </div>
+        <div class="funnel-step">
+          <div class="funnel-label"><span>Hero CTA Click</span><span>1,543</span></div>
+          <div class="funnel-bar"><div class="funnel-fill" style="width:32%;background:rgba(79,140,255,0.6)">32%</div></div>
+        </div>
+        <div class="funnel-step">
+          <div class="funnel-label"><span>Form Start</span><span>731</span></div>
+          <div class="funnel-bar"><div class="funnel-fill" style="width:15%;background:rgba(79,140,255,0.7)">15%</div></div>
+        </div>
+        <div class="funnel-step">
+          <div class="funnel-label"><span>Signup Submit</span><span>154</span></div>
+          <div class="funnel-bar"><div class="funnel-fill" style="width:3.2%;background:var(--acc)">3.2%</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom 3 cards -->
+  <div class="bottom-row">
+
+    <!-- Event tracking table -->
+    <div class="card">
+      <div class="card-title">Top GA4 Events (30d)</div>
+      <table class="event-table">
+        <tr><th>Event Name</th><th>Count</th><th>Users</th></tr>
+        <tr>
+          <td><span class="event-name">page_view</span></td>
+          <td>14,203</td>
+          <td><span class="count-badge">4,821</span></td>
+        </tr>
+        <tr>
+          <td><span class="event-name">scroll_depth</span></td>
+          <td>8,941</td>
+          <td><span class="count-badge">3,217</span></td>
+        </tr>
+        <tr>
+          <td><span class="event-name">signup_click</span></td>
+          <td>1,543</td>
+          <td><span class="count-badge">1,201</span></td>
+        </tr>
+        <tr>
+          <td><span class="event-name">feature_click</span></td>
+          <td>982</td>
+          <td><span class="count-badge">658</span></td>
+        </tr>
+        <tr>
+          <td><span class="event-name">plan_click</span></td>
+          <td>471</td>
+          <td><span class="count-badge">389</span></td>
+        </tr>
+        <tr>
+          <td><span class="event-name">sign_up</span></td>
+          <td>154</td>
+          <td><span class="count-badge">154</span></td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- Scroll depth -->
+    <div class="card">
+      <div class="card-title">Scroll Depth Breakdown</div>
+      <div class="donut-wrap">
+        <div class="scroll-bar">
+          <div class="scroll-label"><span>25% depth</span><span style="color:var(--grn)">84%</span></div>
+          <div class="scroll-track"><div class="scroll-fill" style="width:84%;background:var(--grn)"></div></div>
+        </div>
+        <div class="scroll-bar">
+          <div class="scroll-label"><span>50% depth</span><span style="color:var(--acc)">61%</span></div>
+          <div class="scroll-track"><div class="scroll-fill" style="width:61%;background:var(--acc)"></div></div>
+        </div>
+        <div class="scroll-bar">
+          <div class="scroll-label"><span>75% depth</span><span style="color:var(--amb)">39%</span></div>
+          <div class="scroll-track"><div class="scroll-fill" style="width:39%;background:var(--amb)"></div></div>
+        </div>
+        <div class="scroll-bar">
+          <div class="scroll-label"><span>90% depth</span><span style="color:var(--red)">22%</span></div>
+          <div class="scroll-track"><div class="scroll-fill" style="width:22%;background:var(--red)"></div></div>
+        </div>
+      </div>
+      <div style="margin-top:1rem;padding-top:0.8rem;border-top:1px solid var(--bdr);font-size:0.75rem;color:var(--muted);">
+        ⚠ Only 22% reach the signup section → CTA should be moved higher.
+      </div>
+    </div>
+
+    <!-- Device split -->
+    <div class="card">
+      <div class="card-title">Traffic by Device</div>
+      <div class="device-list">
+        <div class="device-item">
+          <div class="device-icon">💻</div>
+          <div class="device-info">
+            <div class="device-name">Desktop</div>
+            <div class="device-bar-wrap"><div class="device-bar" style="width:58%;background:var(--acc)"></div></div>
+          </div>
+          <div class="device-pct">58%</div>
+        </div>
+        <div class="device-item">
+          <div class="device-icon">📱</div>
+          <div class="device-info">
+            <div class="device-name">Mobile</div>
+            <div class="device-bar-wrap"><div class="device-bar" style="width:34%;background:var(--acc2)"></div></div>
+          </div>
+          <div class="device-pct">34%</div>
+        </div>
+        <div class="device-item">
+          <div class="device-icon">📟</div>
+          <div class="device-info">
+            <div class="device-name">Tablet</div>
+            <div class="device-bar-wrap"><div class="device-bar" style="width:8%;background:var(--muted)"></div></div>
+          </div>
+          <div class="device-pct">8%</div>
+        </div>
+      </div>
+      <div style="margin-top:1rem;padding-top:0.8rem;border-top:1px solid var(--bdr);">
+        <div style="font-size:0.72rem;color:var(--muted);margin-bottom:0.5rem;">Conversion by device</div>
+        <div style="display:flex;gap:1rem;font-size:0.8rem;">
+          <span>💻 <strong>4.1%</strong></span>
+          <span>📱 <strong style="color:var(--red)">1.8%</strong></span>
+          <span>📟 <strong>3.0%</strong></span>
+        </div>
+        <div style="font-size:0.72rem;color:var(--amb);margin-top:0.5rem;">⚠ Mobile CVR 56% lower → optimize mobile UX</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Analyst Insights -->
+  <div class="insights">
+    <h2>🔍 Analyst Insights & Recommendations</h2>
+    <div class="insight-grid">
+      <div class="insight-card warn">
+        <div class="insight-icon">📉</div>
+        <div class="insight-title">High drop-off before signup form</div>
+        <div class="insight-desc">Only 22% of users scroll to the signup section. 78% leave before seeing the CTA — the biggest conversion blocker.</div>
+        <div class="insight-action">→ Move CTA button above the fold / add sticky signup bar</div>
+      </div>
+      <div class="insight-card warn">
+        <div class="insight-icon">📱</div>
+        <div class="insight-title">Mobile conversion gap</div>
+        <div class="insight-desc">Mobile users convert at 1.8% vs 4.1% on desktop. 34% of traffic is mobile but generates only 18% of signups.</div>
+        <div class="insight-action">→ A/B test mobile-specific layout with larger tap targets</div>
+      </div>
+      <div class="insight-card good">
+        <div class="insight-icon">📈</div>
+        <div class="insight-title">Campaign driving strong top-of-funnel</div>
+        <div class="insight-desc">Paid campaign launched Apr 18 increased daily sessions by 42%. Traffic quality (bounce rate) also improved by 3.1%.</div>
+        <div class="insight-action">→ Scale campaign budget; quality traffic confirmed</div>
+      </div>
+      <div class="insight-card info">
+        <div class="insight-icon">🏷</div>
+        <div class="insight-title">Feature section drives intent</div>
+        <div class="insight-desc">"AI Learning Paths" feature card receives 38% of all feature_click events — highest of any card.</div>
+        <div class="insight-action">→ Lead with AI positioning in hero copy & ads</div>
+      </div>
+      <div class="insight-card info">
+        <div class="insight-icon">💰</div>
+        <div class="insight-title">Pro plan dominates plan intent</div>
+        <div class="insight-desc">61% of plan_click events target the Pro plan. Free plan clicks mostly come from mobile — likely price-sensitive segment.</div>
+        <div class="insight-action">→ Add social proof next to Pro CTA; test annual billing</div>
+      </div>
+      <div class="insight-card good">
+        <div class="insight-icon">✅</div>
+        <div class="insight-title">Session duration trending up</div>
+        <div class="insight-desc">Avg. session time grew 12s month-over-month. Users who reach the pricing section stay 4.2m on average.</div>
+        <div class="insight-action">→ Pricing page is high-intent; add live chat widget</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="text-align:center;padding:2.5rem 0 1rem;font-size:0.72rem;color:var(--muted);">
+    Data source: Google Analytics 4 · Simulated for portfolio purposes · GDPR compliant (Consent Mode v2 active)
+  </div>
+
+</div>
+</div>
+
+<script>
+  // Range button interaction
+  document.querySelectorAll('.rb').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.rb').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    });
+  });
+  // Sidebar nav
+  document.querySelectorAll('.nav-item').forEach(item => {
+    item.addEventListener('click', () => {
+      document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+      item.classList.add('active');
+    });
+  });
+</script>
+</body>
+</html>
