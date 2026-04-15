@@ -9,12 +9,12 @@
      GA4 TRACKING — replace G-XXXXXXXXXX with your Measurement ID
      Get it free at: analytics.google.com → Admin → Data Streams
      ======================================================== -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-YC281T6RBP"></script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
-  gtag('config', 'G-YC281T6RBP', {
+  gtag('config', 'G-XXXXXXXXXX', {
     send_page_view: true          // tracks: page_view (automatic)
   });
 
@@ -268,7 +268,7 @@
       Start for free →
     </button>
     <button class="btn-secondary"
-      onclick="trackEvent('demo_click', {location: 'hero'})">
+      onclick="trackEvent('demo_click', {location: 'hero'}); showToast('🎬 Demo video coming soon!')">
       Watch demo
     </button>
   </div>
@@ -288,32 +288,32 @@
   <div class="section-label">Why LearnFlow</div>
   <h2>Everything you need to level up</h2>
   <div class="features-grid">
-    <div class="feature-card" onclick="trackEvent('feature_click', {feature: 'ai_paths'})">
+    <div class="feature-card" onclick="trackEvent('feature_click', {feature: 'ai_paths'}); showToast('🧠 AI Learning Paths — coming soon!')">
       <div class="icon">🧠</div>
       <h3>AI Learning Paths</h3>
       <p>Personalized curriculum that adapts to your skill level, pace, and career goals in real time.</p>
     </div>
-    <div class="feature-card" onclick="trackEvent('feature_click', {feature: 'live_projects'})">
+    <div class="feature-card" onclick="trackEvent('feature_click', {feature: 'live_projects'}); showToast('💻 Live Projects — coming soon!')">
       <div class="icon">💻</div>
       <h3>Live Projects</h3>
       <p>Build real-world portfolio projects with expert code review and feedback from industry mentors.</p>
     </div>
-    <div class="feature-card" onclick="trackEvent('feature_click', {feature: 'certificates'})">
+    <div class="feature-card" onclick="trackEvent('feature_click', {feature: 'certificates'}); showToast('🎓 Verified Certificates — coming soon!')">
       <div class="icon">🎓</div>
       <h3>Verified Certificates</h3>
       <p>Industry-recognized credentials you can share directly on LinkedIn or your CV.</p>
     </div>
-    <div class="feature-card" onclick="trackEvent('feature_click', {feature: 'community'})">
+    <div class="feature-card" onclick="trackEvent('feature_click', {feature: 'community'}); showToast('🤝 Peer Community — coming soon!')">
       <div class="icon">🤝</div>
       <h3>Peer Community</h3>
       <p>Connect with 48,000+ learners worldwide. Study groups, Q&A, and accountability partners.</p>
     </div>
-    <div class="feature-card" onclick="trackEvent('feature_click', {feature: 'mobile'})">
+    <div class="feature-card" onclick="trackEvent('feature_click', {feature: 'mobile'}); showToast('📱 Mobile App — coming soon!')">
       <div class="icon">📱</div>
       <h3>Mobile-first</h3>
       <p>Learn on the go with offline mode. Progress syncs across all your devices automatically.</p>
     </div>
-    <div class="feature-card" onclick="trackEvent('feature_click', {feature: 'analytics'})">
+    <div class="feature-card" onclick="trackEvent('feature_click', {feature: 'analytics'}); showToast('📊 Progress Analytics — coming soon!')">
       <div class="icon">📊</div>
       <h3>Progress Analytics</h3>
       <p>Detailed dashboards showing your learning velocity, streaks, and skill gap analysis.</p>
@@ -335,7 +335,7 @@
         <li>Basic progress tracking</li>
       </ul>
       <button class="btn-plan outline"
-        onclick="trackEvent('plan_click', {plan: 'free', location: 'pricing'})">
+        onclick="trackEvent('plan_click', {plan: 'free', location: 'pricing'}); showToast('✓ Free plan — scroll down to sign up!')">
         Get started
       </button>
     </div>
@@ -351,7 +351,7 @@
         <li>Offline mobile</li>
       </ul>
       <button class="btn-plan filled"
-        onclick="trackEvent('plan_click', {plan: 'pro', location: 'pricing'}); trackEvent('signup_click', {location: 'pricing', button_text: 'Choose Pro'})">
+        onclick="trackEvent('plan_click', {plan: 'pro', location: 'pricing'}); trackEvent('signup_click', {location: 'pricing', button_text: 'Choose Pro'}); showToast('⭐ Pro plan selected — scroll down to sign up!')">
         Choose Pro →
       </button>
     </div>
@@ -365,7 +365,7 @@
         <li>Priority support</li>
       </ul>
       <button class="btn-plan outline"
-        onclick="trackEvent('plan_click', {plan: 'teams', location: 'pricing'})">
+        onclick="trackEvent('plan_click', {plan: 'teams', location: 'pricing'}); showToast('📩 Teams plan — we\'ll be in touch!')">
         Contact sales
       </button>
     </div>
